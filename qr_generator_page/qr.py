@@ -16,13 +16,15 @@ app.secret_key = os.urandom(24)
 
 # OAuth 2.0 configuration (credentials from Google Cloud Console)
 CLIENT_SECRETS_FILE = "credentials.json"  # Your credentials.json file path
-SCOPES = ['https://www.googleapis.com/auth/drive.file']  # Scopes for uploading files
+
+SCOPES = ['openid', 'profile', 'email']
+  # Scopes for uploading files
 
 # OAuth 2.0 flow
 flow = Flow.from_client_secrets_file(
     CLIENT_SECRETS_FILE,
     scopes=SCOPES,
-    redirect_uri='https://localhost:5000/qr_code'
+    redirect_uri='http://localhost:5000/gr_code'
 )
 
 # Route to start OAuth authorization flow
@@ -60,7 +62,7 @@ def upload_file():
     if not credentials:
         return redirect(url_for('qr_code'))
 
-    credentials = google.auth.credentials.Credentials(**credentials)
+    credentials = google.oauth2.credentials.Credentials(**credentials)
     drive_service = build('drive', 'v3', credentials=credentials)
 
     # Generate a QR code (you can replace this with dynamic data if needed)
@@ -96,9 +98,9 @@ def upload_file():
 def main():
     return '''
         <h1>QR Code Generator</h1>
-        <a href="/authorize">Authorize and Upload QR Code to Google Drive</a>
+        <a href="/authorize">Authorize</a>
     '''
 
 # Run the Flask application
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(ssl_context=('cert.pem', 'key.pem'))
